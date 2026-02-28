@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>TRPG システム</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- =============================
+       画面①：ロール選択
+  ============================== -->
+  <div id="screenRole" class="screen active">
+    <div class="role-select">
+      <h1>TRPG システム</h1>
+      <p>あなたはどの立場で参加しますか？</p>
+      <div class="role-buttons">
+        <button id="gmBtn" class="role gm">🛠 GM</button>
+        <button id="plBtn" class="role pl">🎭 PL</button>
+      </div>
+      <hr class="role-hr" />
+      <p class="resume-label">セーブデータから再開する</p>
+      <label class="btn btn-outline load-btn">
+        📂 セーブデータを読み込む
+        <input type="file" id="loadFileInput" accept=".json" style="display:none" />
+      </label>
+    </div>
+  </div>
+
+  <!-- =============================
+       画面①-PL：ルーム入室
+  ============================== -->
+  <div id="screenJoinRoom" class="screen">
+    <div class="role-select">
+      <h1>🎭 PL参加</h1>
+      <p>GMから共有されたルームIDを入力してください</p>
+      <div class="join-room-form">
+        <input id="roomIdInput" placeholder="ルームID（例：ABC123）" maxlength="6" />
+        <button id="joinRoomBtn" class="btn btn-pl">入室する</button>
+      </div>
+      <p id="joinRoomError" class="error-msg"></p>
+      <button class="btn btn-outline" style="margin-top:16px" onclick="showScreen('screenRole')">← 戻る</button>
+    </div>
+  </div>
+
+  <!-- =============================
+       画面②-GM：シナリオ編集
+  ============================== -->
+  <div id="screenGMEdit" class="screen">
+    <header class="gm-header">
+      <span class="header-badge gm">🛠 GM</span>
+      <h1>シナリオ編集</h1>
+      <div class="room-id-display" id="roomIdDisplay"></div>
+      <button class="btn btn-gm" id="gmStartBtn">▶ プレイ開始</button>
+    </header>
+    <main class="edit-main">
+      <div class="edit-toolbar">
+        <button class="btn btn-gm" onclick="addNode()">＋ ノード追加</button>
+        <button class="btn btn-outline" onclick="downloadScenario()">⬇ JSONダウンロード</button>
+        <label class="btn btn-outline">
+          📂 JSONを読み込む
+          <input type="file" id="scenarioFileInput" accept=".json" style="display:none" onchange="loadScenarioFile(this)" />
+        </label>
+      </div>
+      <div id="nodeList"></div>
+    </main>
+  </div>
+
+  <!-- =============================
+       画面②-PL：キャラシート編集
+  ============================== -->
+  <div id="screenPLEdit" class="screen">
+    <header class="pl-header">
+      <span class="header-badge pl">🎭 PL</span>
+      <h1>キャラクターシート</h1>
+      <div class="room-id-display" id="roomIdDisplayPL"></div>
+      <button class="btn btn-pl" id="plReadyBtn">✔ 準備完了</button>
+    </header>
+    <main class="edit-main">
+      <div class="char-header-card">
+        <div class="field-row">
+          <div class="field-group">
+            <label>キャラクター名</label>
+            <input id="charName" placeholder="例：田中太郎" />
+          </div>
+          <div class="field-group">
+            <label>職業</label>
+            <input id="charJob" placeholder="例：探偵" />
+          </div>
+          <div class="field-group">
+            <label>年齢</label>
+            <input id="charAge" type="number" placeholder="例：30" />
+          </div>
+        </div>
+      </div>
+      <div class="section-title">技能一覧</div>
+      <table class="skill-table">
+        <thead>
+          <tr><th>技能名</th><th>基本値</th><th>現在値</th><th></th></tr>
+        </thead>
+        <tbody id="skillList"></tbody>
+      </table>
+      <div class="edit-toolbar">
+        <button class="btn btn-pl" onclick="addSkill()">＋ 技能を追加</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- =============================
+       画面③-GM：プレイ画面
+  ============================== -->
+  <div id="screenGMPlay" class="screen">
+    <header class="gm-header">
+      <span class="header-badge gm">🛠 GM</span>
+      <h1>TRPG システム</h1>
+      <div class="room-id-display" id="roomIdDisplayPlay"></div>
+      <div id="turnStatusGM" class="turn-status turn-gm">GMモード：進行中</div>
+      <button class="btn btn-outline save-btn" onclick="saveGame()">💾 セーブ</button>
+    </header>
+    <main class="play-main">
+      <section id="story">
+        <h2>シナリオ</h2>
+        <p id="storyText">シナリオを読み込み中...</p>
+        <p id="gmOnlyText" class="gm-only-text"></p>
+        <div id="gmNextArea"></div>
+      </section>
+      <section id="log">
+        <h2>ログ</h2>
+        <pre id="logText"></pre>
+      </section>
+      <aside id="control">
+        <div id="gmPanel" class="panel">
+          <h3>GM操作</h3>
+          <div class="section-title" style="margin-top:12px">参加PL</div>
+          <div id="plList"></div>
+          <hr />
+          <div class="section-title">判定キュー</div>
+          <div id="judgeQueue"></div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <!-- =============================
+       画面③-PL：プレイ画面
+  ============================== -->
+  <div id="screenPLPlay" class="screen">
+    <header class="pl-header">
+      <span class="header-badge pl">🎭 PL</span>
+      <h1>TRPG システム</h1>
+      <div class="room-id-display" id="roomIdDisplayPLPlay"></div>
+      <div id="turnStatusPL" class="turn-status turn-pl">PLモード</div>
+      <button class="btn btn-outline save-btn" onclick="saveGame()">💾 セーブ</button>
+    </header>
+    <main class="play-main">
+      <section id="plStory">
+        <h2>シナリオ</h2>
+        <p id="plStoryText">GMの進行を待っています...</p>
+      </section>
+      <section id="log2">
+        <h2>ログ</h2>
+        <pre id="logText2"></pre>
+      </section>
+      <aside id="plControl">
+        <div id="plPanel" class="panel">
+          <h3>PL操作</h3>
+          <div id="plDisabledReason" class="disabled-reason">準備中...</div>
+          <hr />
+          <select id="skillSelect" disabled>
+            <option value="">技能を選択</option>
+          </select>
+          <button id="judgeBtn" disabled>判定</button>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>

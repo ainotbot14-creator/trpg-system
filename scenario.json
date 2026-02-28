@@ -1,0 +1,18 @@
+{
+  "start": {
+    "text": "古い屋敷の一室にいる。",
+    "gmText": "壁の向こうに隠し通路がある。",
+    "judge": {
+      "skill": "聞き耳",
+      "success": "secret",
+      "failure": "nothing"
+    }
+  },
+  "secret": {
+    "text": "隠し通路を発見した。",
+    "gmText": "この先に敵が潜んでいる。"
+  },
+  "nothing": {
+    "text": "特に変わった様子はない。"
+  }
+}
