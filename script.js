@@ -431,7 +431,7 @@ function setPLEnabled() {
 // シナリオ編集
 // ==========================
 window.addNode = function() {
-  const id = "node_" + Date.now();
+ const id = "場面_" + Date.now();
   scenarioData[id] = { text: "", gmText: "" };
   renderNodes();
   document.querySelectorAll(".node-card")[document.querySelectorAll(".node-card").length - 1]
@@ -631,4 +631,5 @@ function download(filename, data) {
   a.href = URL.createObjectURL(blob);
   a.download = filename;
   a.click();
+
 }
